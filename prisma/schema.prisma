@@ -1,0 +1,83 @@
+// This is your Prisma schema file
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model EmailCampaign {
+  id          String     @id @default(uuid())
+  name        String
+  subject     String
+  cc          String?
+  bcc         String?
+  body        String     @db.Text
+  fileData    Json
+  
+  // Existing fields
+  lastRowSent Int        @default(0)
+  status      String     @default("PENDING") // PENDING, QUEUED, PAUSED, RUNNING, COMPLETED
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  
+  // NEW: Queue Management fields
+  priority    Int        @default(0) // 0 = lowest, higher = priority
+  
+  // Existing Relation (Keep this exactly as is)
+  logs        EmailLog[]
+  assignedAgentId String?
+
+  userId         String
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model MailerAgent {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  password    String   
+  dailyLimit  Int      @default(500)
+  sentToday   Int      @default(0)
+  lastResetAt DateTime @default(now())
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  logs       EmailLog[]
+}
+
+model EmailLog {
+  id         String        @id @default(uuid())
+  campaignId String
+  campaign   EmailCampaign @relation(fields: [campaignId], references: [id])
+  agentId    String        // Store the ID of the MailerAgent used
+  recipient  String
+  status     String        // SENT, FAILED
+  error      String?
+  sentAt     DateTime      @default(now())
+
+  userId     String        // Link directly to user for instant scoping
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  agent      MailerAgent   @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([userId, sentAt])
+}
+
+model User {
+  id        String          @id @default(uuid())
+  email     String          @unique
+  password  String
+  name      String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  
+  // Fully isolated resources for this user
+  campaigns EmailCampaign[]
+  agents    MailerAgent[]
+  logs      EmailLog[]
+}

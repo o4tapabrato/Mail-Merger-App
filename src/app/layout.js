@@ -1,4 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
+import Sidebar from "./components/Sidebar";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -18,11 +19,14 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en">
+      <body className="bg-gray-950 text-gray-100 flex">
+        <Sidebar />
+        {/* The ml-64 pushes the content over to make room for the fixed sidebar */}
+        <main className="ml-64 flex-1">
+          {children}
+        </main>
+      </body>
     </html>
   );
 }
