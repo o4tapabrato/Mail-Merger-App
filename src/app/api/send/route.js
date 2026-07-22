@@ -1,4 +1,4 @@
-import { processCampaign } from '@/lib/campaignWorker';
+import { processQueue } from '@/lib/campaignWorker';
 import { NextResponse } from 'next/server';
 
 export async function POST(req) {
