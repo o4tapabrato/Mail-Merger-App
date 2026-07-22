@@ -1,6 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import Sidebar from "./components/Sidebar";
 import "./globals.css";
+import TopLoader from "./components/TopLoader";
+import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,6 +23,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className="bg-gray-950 text-gray-100 flex">
+        <Suspense fallback={null}>
+          <TopLoader />
+        </Suspense>
         <Sidebar />
         {/* The ml-64 pushes the content over to make room for the fixed sidebar */}
         <main className="ml-64 flex-1">
